@@ -1,0 +1,16 @@
+{
+  "domain": "balance_neto",
+  "name": "Balance Neto",
+  "version": "0.1.0",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/tarifa_indexada",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@miguelangellv"
+  ],
+  "iot_class": "local_polling"
+}
