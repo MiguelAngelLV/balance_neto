@@ -3,7 +3,7 @@
   "name": "Balance Neto",
   "version": "0.1.0",
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/tarifa_indexada",
+  "documentation": "https://github.com/MiguelAngelLV/balance_neto",
   "requirements": [],
   "ssdp": [],
   "zeroconf": [],
