@@ -41,7 +41,6 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
     icon="mdi:scale-balance",
     name="Balance Neto",
     native_unit_of_measurement="kWh",
-    state_class=STATE_CLASS_MEASUREMENT,
 )
 
 
@@ -83,7 +82,7 @@ class GridSensor(SensorEntity, RestoreEntity):
 
     def __init__(self, description: SensorEntityDescription,) -> None:
         super().__init__()
-        self._state = 0
+        self._native_value = 0
         self._attrs: Mapping[str, Any] = {}
         self._attr_name = description.name
         self._attr_unique_id = description.key
@@ -95,16 +94,16 @@ class GridSensor(SensorEntity, RestoreEntity):
         await super().async_added_to_hass()
         if (last_sensor_data := await self.async_get_last_state()) is not None:
             if last_sensor_data.state.isnumeric():
-                self._state = last_sensor_data.state
+                self._native_value = last_sensor_data.state
 
         self.async_write_ha_state()
 
     @property
-    def native_value(self) -> StateType:
-        return self._state
+    def native_value(self):
+        return self._native_value
 
     def update_value(self, value: float):
-        self._state = value
+        self._native_value = value
         self.async_write_ha_state()
 
 
@@ -113,10 +112,10 @@ class BalanceSensor(SensorEntity, RestoreEntity):
                  import_sensor: GridSensor,
                  export_sensor: GridSensor) -> None:
         super().__init__()
-        self._import = None
-        self._export = None
-        self._import_offset = None
-        self._export_offset = None
+        self._import = 0
+        self._export = 0
+        self._import_offset = 0
+        self._export_offset = 0
         self._import_sensor = import_sensor
         self._export_sensor = export_sensor
 
@@ -133,8 +132,8 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         await super().async_added_to_hass()
         if (last_sensor_data := await self.async_get_last_state()) is not None:
             self._native_value = last_sensor_data.state
-            self._import_offset = last_sensor_data.attributes.get('Import Offset')
-            self._export_offset = last_sensor_data.attributes.get('Export Offset')
+            self._import_offset = last_sensor_data.attributes.get('Import Offset', 0)
+            self._export_offset = last_sensor_data.attributes.get('Export Offset', 0)
             self._last_reset = last_sensor_data.attributes.get('Last Reset')
 
         # Si se restablece en hora distinta, se evita usar valores antiguos
@@ -155,9 +154,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
                 'Last Reset': self._last_reset}
 
     def _update_value(self):
-        if self._import is None or self._export is None:
-            return
-
         self._native_value = (self._export - self._export_offset) - (self._import - self._import_offset)
         self.async_write_ha_state()
 
@@ -166,7 +162,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             return
 
         self._import = float(state.state)
-        if self._import_offset is None:
+        if self._import_offset == 0:
             self._import_offset = self._import
 
         self._update_value()
@@ -175,7 +171,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         if state is None:
             return
         self._export = float(state.state)
-        if self._export_offset is None:
+        if self._export_offset == 0:
             self._export_offset = self._export
 
         self._update_value()
@@ -190,5 +186,5 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             self._import_sensor.update_value(-self._native_value)
 
     def _reset(self):
-        self._import_offset = None
-        self._export_offset = None
+        self._import_offset = 0
+        self._export_offset = 0
