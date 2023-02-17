@@ -71,7 +71,7 @@ async def async_setup_entry(
         grid_balance.update_totals()
         async_track_point_in_time(hass, update_totals_and_schedule, now + timedelta(hours=1))
 
-    next = datetime.now().replace(minute=59, second=50, microsecond=0)
+    next = datetime.now().replace(minute=59, second=55, microsecond=0)
     async_track_point_in_time(hass, update_totals_and_schedule, next)
 
 
