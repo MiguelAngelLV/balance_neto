@@ -103,7 +103,7 @@ class GridSensor(SensorEntity, RestoreEntity):
         return self._native_value
 
     def update_value(self, value: float):
-        self._native_value = value
+        self._native_value = float(self._native_value) + value
         self.async_write_ha_state()
 
 
