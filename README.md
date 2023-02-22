@@ -3,7 +3,7 @@
 
 ## ¿Qué es el balance neto?
 
-En España, los usuarios de placas fotovoltáicas con compensación de excedentes disponen del balance neto horario el cual
+En España, los usuarios de placas fotovoltáicas con compensación de excedentes disponen del balance neto horario, el cual
 calcula el resultado final de importación y exportación cada hora y en base a este se le factura.
 
 Dicho más sencillo: Si en una hora exportas 3kWh e importas 1kWh, simplemente se considerará que has exportado 2kWh.
@@ -25,7 +25,7 @@ Supongamos que importar cuesta 0.15€/kWh y exportar nos descuenta 0.11€/kWh,
 `3 - 1 = 2 => 2 * 0.15 = 0.30`
 
 
-Como vemos, en ambos casos el balance neto beficia al usuario.
+Como vemos, en ambos casos el balance neto beneficia al usuario.
 
 
 ## ¿Qué hace este componente?
@@ -65,15 +65,14 @@ El asistente te solicitará 2 entidades: kWh totales consumidos y kWh totales ex
 ## Uso
 Una vez configurado el componente, usa como sensor de _consumo de red_ «Importación Neta» y _volcar a la red_ «Expotación Neta». 
 
->#### :warning: Si ya tienes histórico de datos en HA, al cambiar los sensores los datos antiguos dejarán de mostrarse. Si quieres mantener los datos tendrás que conectarse a la base de datos y copiar/actualizar los registros antiguos de importación/exportación a los de importación neta y exportación neta..
+>#### :warning: Si ya tienes histórico de datos en HA, al cambiar los sensores los datos antiguos dejarán de mostrarse. Si quieres mantener los datos tendrás que conectarse a la base de datos y copiar/actualizar los registros antiguos de importación/exportación a los de importación neta y exportación neta.
 
 
 ## Activar dispositivos cuando hay excedentes
 
-Gracias a la entidad de Balance Horario Actual podrás activar y desactivar dispositivos de alto consumo, como termos eléctricos, para aprovechar al máximo
-los excedentes. 
+Gracias a la entidad de Balance Horario Actual podrás activar y desactivar dispositivos de alto consumo, como termos eléctricos, para aprovechar al máximo los excedentes. 
 
 En vez de usar reguladores de potencia para adaptar el consumo a tu producción actual, puedes encender y apagar el dispositivo según el valor
-del balance. Por ejemplo encender el termo/AC cuando sea el balance neto sea superior a 0.2kWh y apagarlo cuando sea inferior a -0.05kWh. 
+del balance. Por ejemplo encender el termo/AC cuando el balance neto sea superior a 0.2kWh y apagarlo cuando sea inferior a -0.05kWh. 
 
 De esta forma evitamos bajar la potencia al pasar una nube de forma puntual o no encender nunca un dispositivo de 1500W si nuestros excedentes son de 750W cuando podríamos tenerlo media hora encendido sin problema.
