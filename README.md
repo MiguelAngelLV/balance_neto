@@ -65,7 +65,8 @@ El asistente te solicitará 2 entidades: kWh totales consumidos y kWh totales ex
 ## Uso
 Una vez configurado el componente, usa como sensor de _consumo de red_ «Importación Neta» y _volcar a la red_ «Expotación Neta». 
 
-> **:warning: Si ya histórico de datos en HA, al cambiar los sensores estos dejarán de mostrase. Te tocará modificar registros en la base de datos si quieres mantenerlos. **
+>#### :warning: Si ya tienes histórico de datos en HA, al cambiar los sensores los datos antiguos dejarán de mostrarse. Si quieres mantener los datos tendrás que conectarse a la base de datos y copiar/actualizar los registros antiguos de importación/exportación a los de importación neta y exportación neta..
+
 
 ## Activar dispositivos cuando hay excedentes
 
