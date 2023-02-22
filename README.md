@@ -15,7 +15,7 @@ Dado que la exportación siempre será más barata que la importación, esto sup
 Supongamos que importar cuesta 0.15€/kWh y exportar nos descuenta 0.11€/kWh, en el primer caso exportamos 3 e importamos 1, en el segundo al revés.
 
 #### Sin Balance
-`1 * 0.15 - 3 * 0.11 = 0.18`
+`1 * 0.15 - 3 * 0.11 = -0.18`
 
 `3 * 0.15 - 1 * 0.11 = 0.34`
 
