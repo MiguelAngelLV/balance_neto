@@ -43,11 +43,11 @@ Después podrás usar Importación Neta y Exportación Neta en el panel de Energ
 
 ### Sin balance neto
 
-![Sin Balance](/home/miguel/Domótica/ha/core/config/custom_components/balance_neto/img/sin balance.png)
+![Sin Balance](img/sin%20balance.png)
 
 ### Con Balance
 
-![Con Balance](/home/miguel/Domótica/ha/core/config/custom_components/balance_neto/img/balance.png)
+![Con Balance](img/balance.png)
 
 
 
