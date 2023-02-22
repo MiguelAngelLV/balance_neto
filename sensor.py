@@ -188,13 +188,14 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
     def update_totals(self):
 
+        value = float(self._state)
         self._last_reset = (datetime.utcnow() + timedelta(hours=1)).strftime("%Y-%m-%d %H:00:00")
         self._import_offset = self._import
         self._export_offset = self._export
-        if self._state > 0:
-            self._export_sensor.update_value(self._state)
+        if value > 0:
+            self._export_sensor.update_value(value)
         else:
-            self._import_sensor.update_value(-self._state)
+            self._import_sensor.update_value(-value)
 
     def _reset(self):
         self._import_offset = 0
