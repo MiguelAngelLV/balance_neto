@@ -51,6 +51,22 @@ Después podrás usar Importación Neta y Exportación Neta en el panel de Energ
 
 
 
+## Instalación
+Puedes instalar el componente usando HACS, para ello basta con añadir este repositorio a los repositorios personalizados y buscarlo escribiendo «balance».
+
+## Configuración
+
+Una vez instalado, ve a _Dispositivos y Servicios -> Añadir Integración_ y busca _Balance_.
+
+El asistente te solicitará 2 entidades: kWh totales consumidos y kWh totales exportados.
+
+
+
+## Uso
+Una vez configurado el componente, usa como sensor de _consumo de red_ «Importación Neta» y _volcar a la red_ «Expotación Neta». 
+
+> **:warning: Si ya histórico de datos en HA, al cambiar los sensores estos dejarán de mostrase. Te tocará modificar registros en la base de datos si quieres mantenerlos. **
+
 ## Activar dispositivos cuando hay excedentes
 
 Gracias a la entidad de Balance Horario Actual podrás activar y desactivar dispositivos de alto consumo, como termos eléctricos, para aprovechar al máximo
