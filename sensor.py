@@ -2,6 +2,8 @@ from datetime import datetime
 from datetime import timedelta
 from typing import Mapping, Any
 import asyncio
+
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from .const import MAX_DIFF
 
 from homeassistant.components.sensor import (
@@ -71,8 +73,15 @@ async def async_setup_entry(
         grid_balance.update_totals()
         async_track_point_in_time(hass, update_totals_and_schedule, now + timedelta(hours=1))
 
+    async def first_after_reboot(now):
+        grid_export.after_reboot()
+        grid_import.after_reboot()
+
     next = datetime.now().replace(minute=59, second=55, microsecond=0)
     async_track_point_in_time(hass, update_totals_and_schedule, next)
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, first_after_reboot)
+
+
 
 
 class GridSensor(SensorEntity, RestoreEntity):
@@ -84,13 +93,18 @@ class GridSensor(SensorEntity, RestoreEntity):
         self._attr_name = description.name
         self._attr_unique_id = description.key
         self.entity_description = description
+        self._reboot = None
 
     async def async_added_to_hass(self):
-        await super().async_added_to_hass()
         if (last_sensor_data := await self.async_get_last_state()) is not None:
             self._state = float(last_sensor_data.state)
 
-        self.async_write_ha_state()
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            'Reboot': self._reboot,
+        }
 
     @property
     def native_value(self):
@@ -98,6 +112,10 @@ class GridSensor(SensorEntity, RestoreEntity):
 
     def update_value(self, value: float):
         self._state = float(self._state) + value
+        self.async_write_ha_state()
+
+    def after_reboot(self):
+        self._reboot = datetime.now().isoformat()
         self.async_write_ha_state()
 
 
@@ -134,12 +152,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             self._import_offset = last_sensor_data.attributes.get('Import Offset', 0)
             self._export_offset = last_sensor_data.attributes.get('Export Offset', 0)
             self._last_reset = last_sensor_data.attributes.get('Last Reset')
-
-        # Si se restablece en hora distinta, se evita usar valores antiguos
-        date = datetime.utcnow().strftime("%Y-%m-%d %H:00:00")
-        if date != self._last_reset:
-            self.update_totals()
-            self._reset()
 
         self.async_write_ha_state()
 
@@ -196,6 +208,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             self._export_sensor.update_value(value)
         else:
             self._import_sensor.update_value(-value)
+
 
     def _reset(self):
         self._import_offset = 0
