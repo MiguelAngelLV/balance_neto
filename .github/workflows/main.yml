@@ -14,10 +14,13 @@ jobs:
         - uses: "home-assistant/actions/hassfest@master"
         
   hacs:
-    name: HACS Action
-    runs-on: "ubuntu-latest"
+    name: HACS Validation
+    runs-on: ubuntu-latest
     steps:
-      - name: HACS Action
-        uses: "hacs/action@main"
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v3
+
+      - name: 🚀 Run HACS validation
+        uses: hacs/action@main
         with:
-          category: "integration"
+          category: integration
