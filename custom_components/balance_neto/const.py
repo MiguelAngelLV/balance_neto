@@ -1,4 +1,4 @@
 """Constants for Balance Neto."""
 
 DOMAIN = "balance_neto"
-MAX_DIFF = 10.0
+MAX_DIFF = 100.0

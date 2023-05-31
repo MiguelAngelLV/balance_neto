@@ -82,10 +82,7 @@ async def async_setup_entry(
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, first_after_reboot)
 
 
-
-
 class GridSensor(SensorEntity, RestoreEntity):
-
     def __init__(self, description: SensorEntityDescription, ) -> None:
         super().__init__()
         self._state = 0
@@ -182,6 +179,10 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         if self._import_offset == 0:
             self._import_offset = value
 
+        diff = abs(value - self._import_offset)
+        if diff > MAX_DIFF:
+            self._import_offset = value
+
         self._import = value
 
         self._update_value()
@@ -193,6 +194,10 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         value = float(state.state)
 
         if self._export_offset == 0:
+            self._export_offset = value
+
+        diff = abs(value - self._export_offset)
+        if diff > MAX_DIFF:
             self._export_offset = value
 
         self._export = value
