@@ -29,6 +29,7 @@ EXPORT_DESCRIPTION = SensorEntityDescription(
     native_unit_of_measurement="kWh",
     device_class=DEVICE_CLASS_ENERGY,
     state_class=STATE_CLASS_TOTAL_INCREASING,
+    suggested_display_precision=2
 )
 
 IMPORT_DESCRIPTION = SensorEntityDescription(
@@ -38,6 +39,7 @@ IMPORT_DESCRIPTION = SensorEntityDescription(
     device_class=DEVICE_CLASS_ENERGY,
     native_unit_of_measurement="kWh",
     state_class=STATE_CLASS_TOTAL_INCREASING,
+    suggested_display_precision=2
 )
 
 BALANCE_DESCRIPTION = SensorEntityDescription(
@@ -45,6 +47,7 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
     icon="mdi:scale-balance",
     name="Balance Neto",
     native_unit_of_measurement="kWh",
+    suggested_display_precision=2
 )
 
 
@@ -95,7 +98,6 @@ class GridSensor(SensorEntity, RestoreEntity):
     async def async_added_to_hass(self):
         if (last_sensor_data := await self.async_get_last_state()) is not None:
             self._state = float(last_sensor_data.state)
-
 
     @property
     def extra_state_attributes(self):
@@ -167,11 +169,11 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         }
 
     def _update_value(self):
-        self._state = round((self._export - self._export_offset) - (self._import - self._import_offset), 2)
+        self._state = (self._export - self._export_offset) - (self._import - self._import_offset)
         self.async_write_ha_state()
 
     def update_import(self, state: State | None):
-        if state is None:
+        if not self._is_value_valid(state):
             return
 
         value = float(state.state)
@@ -188,7 +190,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         self._update_value()
 
     def update_export(self, state: State | None):
-        if state is None or state.state == 0:
+        if not self._is_value_valid(state):
             return
 
         value = float(state.state)
@@ -204,7 +206,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         self._update_value()
 
     def update_totals(self):
-
         value = float(self._state)
         self._last_reset = (datetime.utcnow() + timedelta(hours=1)).strftime("%Y-%m-%d %H:00:00")
         self._import_offset = self._import
@@ -214,7 +215,16 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         else:
             self._import_sensor.update_value(-value)
 
+        self._update_value()
 
     def _reset(self):
         self._import_offset = 0
         self._export_offset = 0
+
+    @staticmethod
+    def _is_value_valid(state):
+        try:
+            value = float(state.state)
+            return value > 0
+        except ValueError:
+            return False
