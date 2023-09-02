@@ -59,7 +59,7 @@ async def async_setup_entry(
     grid_import = GridSensor(IMPORT_DESCRIPTION, f"{entry.entry_id}-import")
     grid_export = GridSensor(EXPORT_DESCRIPTION, f"{entry.entry_id}-export")
 
-    grid_balance = BalanceSensor(BALANCE_DESCRIPTION, grid_import, grid_export, f"{entry.entry_id}-balance")
+    grid_balance = BalanceSensor(BALANCE_DESCRIPTION, grid_import, grid_export, import_id, export_id, f"{entry.entry_id}-balance")
 
     async_add_entities([grid_import, grid_export, grid_balance])
 
@@ -123,13 +123,17 @@ class BalanceSensor(SensorEntity, RestoreEntity):
     def __init__(self, description: SensorEntityDescription,
                  import_sensor: GridSensor,
                  export_sensor: GridSensor,
+                 import_id: str,
+                 export_id: str,
                  unique_id
                  ) -> None:
         super().__init__()
         self._import = 0
         self._export = 0
         self._import_offset = 0
+        self._import_id = import_id
         self._export_offset = 0
+        self._export_id = export_id
         self._import_sensor = import_sensor
         self._export_sensor = export_sensor
 
@@ -175,8 +179,12 @@ class BalanceSensor(SensorEntity, RestoreEntity):
     def update_values(self):
 
         try:
-            import_state = float(self._import_sensor.state)
-            export_state = float(self._export_sensor.state)
+
+            _LOGGER.debug("Import (%s): %s", self._import_id, self.hass.states.get(self._import_id).state)
+            _LOGGER.debug("Export (%s): %s", self._export_id, self.hass.states.get(self._export_id).state)
+
+            import_state = float(self.hass.states.get(self._import_id).state)
+            export_state = float(self.hass.states.get(self._export_id).state)
 
             if self._import_offset == 0:
                 self._import_offset = import_state
@@ -192,11 +200,15 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             if diff > MAX_DIFF:
                 self._export_offset = export_state
 
-            _LOGGER.warning("Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
+            _LOGGER.debug("Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
                             import_state, export_state, self._import_offset, self._export_offset)
 
+            self._import = import_state
+            self._export = export_state
+
             self._update_value()
-        except ValueError:
+        except ValueError as e:
+            _LOGGER.error(e)
             return
 
     def update_totals(self):
