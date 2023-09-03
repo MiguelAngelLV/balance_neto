@@ -1,78 +1,71 @@
-# Componente Balance Neto para Home Assistant
+([Ver en español](README-es.md))
 
+# Net Balance Component for Home Assistant
 
-## ¿Qué es el balance neto?
+## What is net balance?
 
-En España, los usuarios de placas fotovoltáicas con compensación de excedentes disponen del balance neto horario, el cual
-calcula el resultado final de importación y exportación cada hora y en base a este se le factura.
+In Spain and other countries, users of photovoltaic panels with surplus compensation have hourly net balance, which calculates the final result of import and export every hour and bills accordingly.
 
-Dicho más sencillo: Si en una hora exportas 3kWh e importas 1kWh, simplemente se considerará que has exportado 2kWh.
+To put it simply: If you export 3 kWh and import 1 kWh in one hour, it will simply be considered that you have exported 2 kWh.
 
-Dado que la exportación siempre será más barata que la importación, esto supone un ahorro importante para el usuario.
+Since exporting is always cheaper than importing, this represents significant savings for the user.
 
-### Ejemplo:
+### Example:
 
-Supongamos que importar cuesta 0.15€/kWh y exportar nos descuenta 0.11€/kWh, en el primer caso exportamos 3 e importamos 1, en el segundo al revés.
+Let's assume that importing costs €0.15/kWh, and exporting gives a discount of €0.11/kWh. In the first case, we export 3 kWh and import 1 kWh, and in the second case, it's the opposite.
 
-#### Sin Balance
-`1 * 0.15 - 3 * 0.11 = -0.18`
+#### Without Balance
+`1 * €0.15 - 3 * €0.11 = -€0.18`
 
-`3 * 0.15 - 1 * 0.11 = 0.34`
+`3 * €0.15 - 1 * €0.11 = €0.34`
 
-#### Con balance
-`1 - 3 = -2 => -2 * 0.11 = -0.22`
+#### With Balance
+`1 - 3 = -2 => -2 * €0.11 = -€0.22`
 
-`3 - 1 = 2 => 2 * 0.15 = 0.30`
+`3 - 1 = 2 => 2 * €0.15 = €0.30`
 
+As we can see, in both cases, net balance benefits the user.
 
-Como vemos, en ambos casos el balance neto beneficia al usuario.
+## What does this component do?
 
+This component calculates your current hourly balance as well as the result at the end of the hour.
 
-## ¿Qué hace este componente?
+To do this, you need to provide the total imported and exported kWh from your inverter, and the component will create three new entities:
 
-Este componente va calculando tu balance horario actual así como el resultado al final de la hora.
+- Net Import
+- Net Export
+- Current Hourly Balance
 
-Para ello, debes indicar los kWh totales importados y exportados de tu inversor  y el componente creará tres entidades nuevas:
+You can then use Net Import and Net Export in the Energy panel for Home Assistant to perform calculations correctly.
 
-- Importación Neta
-- Exportación Neta
-- Balance Horario Actual
+### Without net metering
 
-Después podrás usar Importación Neta y Exportación Neta en el panel de Energía para que Home Assistant haga los calculos correctamente.
+![Without Balance](img/sin%20balance.png)
 
+### With Balance
 
-### Sin balance neto
+![With Balance](img/balance.png)
 
-![Sin Balance](img/sin%20balance.png)
+## Installation
 
-### Con Balance
+You can install the component using HACS. To do this, simply add this repository to your custom repositories and search for "balance neto".
 
-![Con Balance](img/balance.png)
+## Configuration
 
+Once installed, go to _Devices and Services -> Add Integration_ and search for _Balance_.
 
+The assistant will ask for 2 entities: total consumed kWh and total exported kWh.
 
-## Instalación
-Puedes instalar el componente usando HACS, para ello basta con añadir este repositorio a los repositorios personalizados y buscarlo escribiendo «balance».
+## Usage
 
-## Configuración
+Once the component is configured, use "Net Import" as the sensor for _network consumption_ and "Net Export" for _network feed_.
 
-Una vez instalado, ve a _Dispositivos y Servicios -> Añadir Integración_ y busca _Balance_.
+>#### :warning: If you already have historical data in HA, changing the sensors will stop displaying old data. If you want to keep the data, you will need to connect to the database and copy/update the old import/export records to the net import and net export records.
 
-El asistente te solicitará 2 entidades: kWh totales consumidos y kWh totales exportados.
+## Activating Devices When There Are Surpluses
 
+Thanks to the Current Hourly Balance entity, you can activate and deactivate high-consumption devices, such as electric water heaters, to make the most of the surpluses.
 
+Instead of using power regulators to adjust consumption to your current production, you can turn the device on and off based on the balance value. For example, turn on the water heater/AC when the net balance is greater than 0.2 kWh and turn it off when it's less than -0.05 kWh.
 
-## Uso
-Una vez configurado el componente, usa como sensor de _consumo de red_ «Importación Neta» y _volcar a la red_ «Expotación Neta». 
-
->#### :warning: Si ya tienes histórico de datos en HA, al cambiar los sensores los datos antiguos dejarán de mostrarse. Si quieres mantener los datos tendrás que conectarse a la base de datos y copiar/actualizar los registros antiguos de importación/exportación a los de importación neta y exportación neta.
-
-
-## Activar dispositivos cuando hay excedentes
-
-Gracias a la entidad de Balance Horario Actual podrás activar y desactivar dispositivos de alto consumo, como termos eléctricos, para aprovechar al máximo los excedentes. 
-
-En vez de usar reguladores de potencia para adaptar el consumo a tu producción actual, puedes encender y apagar el dispositivo según el valor
-del balance. Por ejemplo encender el termo/AC cuando el balance neto sea superior a 0.2kWh y apagarlo cuando sea inferior a -0.05kWh. 
-
-De esta forma evitamos bajar la potencia al pasar una nube de forma puntual o no encender nunca un dispositivo de 1500W si nuestros excedentes son de 750W cuando podríamos tenerlo media hora encendido sin problema.
+This way, we can avoid reducing power when a cloud passes by temporarily or never turning on a 1500W device if our surpluses are 750W when we could have it on for half an hour without any issues.
