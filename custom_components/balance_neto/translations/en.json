@@ -1,19 +1,27 @@
 {
   "config": {
-    "abort": {
-      "already_configured": "Device is already configured"
-    },
     "error": {
-      "cannot_connect": "Failed to connect",
-      "invalid_auth": "Invalid authentication",
       "unknown": "Unexpected error"
     },
     "step": {
       "user": {
         "data": {
-          "grid_import": "kWh totales consumidos",
-          "grid_export": "kWh totales exportados"
+          "grid_import": "Total imported kWh",
+          "grid_export": "Total exported kWh"
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor":{
+      "net_exported": {
+        "name": "Net Exported"
+      },
+      "net_imported": {
+        "name": "Net Imported"
+      },
+      "net_balance": {
+        "name": "Net balance"
       }
     }
   }

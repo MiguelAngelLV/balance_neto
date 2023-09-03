@@ -1,23 +1,28 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Fallo al conectar",
-            "invalid_auth": "Token inválido",
-            "unknown": "Error inesperado"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "token": "Token",
-                    "peak": "Potencia en punta (kW)",
-                    "off_peak": "Potencia en punta (kW)",
-                    "import": "kWh totales consumidos",
-                    "export": "kWh totales exportados"
-                }
-            }
+  "config": {
+    "error": {
+      "unknown": "Error inesperado"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "grid_import": "kWh totales consumidos",
+          "grid_export": "kWh totales exportados"
         }
+      }
     }
+  },
+  "entity": {
+    "sensor": {
+      "net_exported": {
+        "name": "Exportación neta"
+      },
+      "net_imported": {
+        "name": "Importación neta"
+      },
+      "net_balance": {
+        "name": "Balance neto"
+      }
+    }
+  }
 }

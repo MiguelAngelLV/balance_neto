@@ -20,9 +20,11 @@ from homeassistant.helpers.event import async_track_state_change
 from .const import MAX_DIFF
 
 EXPORT_DESCRIPTION = SensorEntityDescription(
-    key="exportado_a_la_red",
+    key="net_exported",
     icon="mdi:home-export-outline",
-    name="Exportación Neta",
+    name="Net exported",
+    translation_key="net_exported",
+    has_entity_name=True,
     native_unit_of_measurement="kWh",
     device_class=DEVICE_CLASS_ENERGY,
     state_class=STATE_CLASS_TOTAL_INCREASING,
@@ -30,9 +32,11 @@ EXPORT_DESCRIPTION = SensorEntityDescription(
 )
 
 IMPORT_DESCRIPTION = SensorEntityDescription(
-    key="importado_de_la_red",
+    key="net_imported",
     icon="mdi:home-import-outline",
-    name="Importación Neta",
+    name="Net imported",
+    translation_key="net_imported",
+    has_entity_name=True,
     device_class=DEVICE_CLASS_ENERGY,
     native_unit_of_measurement="kWh",
     state_class=STATE_CLASS_TOTAL_INCREASING,
@@ -40,9 +44,11 @@ IMPORT_DESCRIPTION = SensorEntityDescription(
 )
 
 BALANCE_DESCRIPTION = SensorEntityDescription(
-    key="balance_neto",
+    key="net_balance",
     icon="mdi:scale-balance",
-    name="Balance Neto",
+    name="Net Balance",
+    translation_key="net_balance",
+    has_entity_name=True,
     native_unit_of_measurement="kWh",
     suggested_display_precision=2
 )
@@ -89,7 +95,6 @@ class GridSensor(SensorEntity, RestoreEntity):
         super().__init__()
         self._state = 0
         self._attrs: Mapping[str, Any] = {}
-        self._attr_name = description.name
         self._attr_unique_id = unique_id
         self.entity_description = description
         self._reboot = None
@@ -136,10 +141,8 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         self._export_id = export_id
         self._import_sensor = import_sensor
         self._export_sensor = export_sensor
-
         self._state = 0
         self._attrs: Mapping[str, Any] = {}
-        self._attr_name = description.name
         self._attr_unique_id = unique_id
         self.entity_description = description
 

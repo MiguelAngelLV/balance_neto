@@ -1,11 +1,6 @@
 {
   "config": {
-    "abort": {
-      "already_configured": "Equipamento já configurado"
-    },
     "error": {
-      "cannot_connect": "Falha na ligação",
-      "invalid_auth": "Autenticação invalida",
       "unknown": "Erro desconhecido"
     },
     "step": {
@@ -14,6 +9,19 @@
           "grid_import": "Total de kWh consumidos",
           "grid_export": "Total de kWh exportados"
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "net_exported": {
+        "name": "Exportação líquida"
+      },
+      "net_imported": {
+        "name": "Importação líquida"
+      },
+      "net_balance": {
+        "name": "Balanço líquido"
       }
     }
   }
