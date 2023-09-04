@@ -1,0 +1,28 @@
+{
+  "config": {
+    "error": {
+      "unknown": "Nieoczekiwany błąd"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "grid_import": "Energia czynna pobrana - kWh",
+          "grid_export": "Energia czynna zwrócona - kWh"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor":{
+      "net_exported": {
+        "name": "Energia - Export netto"
+      },
+      "net_imported": {
+        "name": "Energia - Import netto"
+      },
+      "net_balance": {
+        "name": "Energia - Bilans netto"
+      }
+    }
+  }
+}
