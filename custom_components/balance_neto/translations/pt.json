@@ -6,7 +6,7 @@
     "step": {
       "user": {
         "data": {
-          "grid_import": "Total de kWh consumidos",
+          "grid_import": "Total de kWh importado",
           "grid_export": "Total de kWh exportados"
         }
       }

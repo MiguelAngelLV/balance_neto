@@ -58,7 +58,7 @@ Puedes instalar el componente usando HACS, para ello basta con añadir este repo
 
 Una vez instalado, ve a _Dispositivos y Servicios -> Añadir Integración_ y busca _Balance_.
 
-El asistente te solicitará 2 entidades: kWh totales consumidos y kWh totales exportados.
+El asistente te solicitará 2 entidades: kWh totales importados de la red y kWh totales exportados a la red.
 
 
 

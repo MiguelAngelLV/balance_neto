@@ -54,7 +54,7 @@ You can install the component using HACS. To do this, simply add this repository
 
 Once installed, go to _Devices and Services -> Add Integration_ and search for _Balance_.
 
-The assistant will ask for 2 entities: total consumed kWh and total exported kWh.
+The assistant will ask for 2 entities: total import from grid kWh and total exported to grid kWh.
 
 ## Usage
 
