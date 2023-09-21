@@ -192,15 +192,15 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             if self._import_offset == 0:
                 self._import_offset = import_state
 
-            diff = abs(import_state - self._import_offset)
-            if diff > MAX_DIFF:
+            diff = import_state - self._import_offset
+            if diff > MAX_DIFF or diff < 0:
                 self._import_offset = import_state
 
             if self._export_offset == 0:
                 self._export_offset = export_state
 
-            diff = abs(export_state - self._export_offset)
-            if diff > MAX_DIFF:
+            diff = export_state - self._export_offset
+            if diff > MAX_DIFF or diff < 0:
                 self._export_offset = export_state
 
             _LOGGER.debug("Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
