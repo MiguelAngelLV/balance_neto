@@ -69,3 +69,8 @@ Thanks to the Current Hourly Balance entity, you can activate and deactivate hig
 Instead of using power regulators to adjust consumption to your current production, you can turn the device on and off based on the balance value. For example, turn on the water heater/AC when the net balance is greater than 0.2 kWh and turn it off when it's less than -0.05 kWh.
 
 This way, we can avoid reducing power when a cloud passes by temporarily or never turning on a 1500W device if our surpluses are 750W when we could have it on for half an hour without any issues.
+
+
+## Videotutorial
+
+[![Videotutorial](https://img.youtube.com/vi/tG9T1NYv2Cs/0.jpg)](https://www.youtube.com/watch?v=tG9T1NYv2Cs "Videotutorial")

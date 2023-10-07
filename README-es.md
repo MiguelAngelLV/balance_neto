@@ -76,3 +76,8 @@ En vez de usar reguladores de potencia para adaptar el consumo a tu producción 
 del balance. Por ejemplo encender el termo/AC cuando el balance neto sea superior a 0.2kWh y apagarlo cuando sea inferior a -0.05kWh. 
 
 De esta forma evitamos bajar la potencia al pasar una nube de forma puntual o no encender nunca un dispositivo de 1500W si nuestros excedentes son de 750W cuando podríamos tenerlo media hora encendido sin problema.
+
+
+## Videotutorial
+
+[![Videotutorial](https://img.youtube.com/vi/tG9T1NYv2Cs/0.jpg)](https://www.youtube.com/watch?v=tG9T1NYv2Cs "Videotutorial")
