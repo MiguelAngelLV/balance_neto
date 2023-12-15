@@ -7,11 +7,30 @@
       "user": {
         "data": {
           "grid_import": "kWh totales importados",
-          "grid_export": "kWh totales exportados"
+          "grid_export": "kWh totales exportados",
+          "period": "Periodo",
+          "offset": "Desfase de seguridad."
         }
       }
     }
   },
+
+  "options": {
+    "error": {
+      "unknown": "Error inesperado"
+    },
+    "step": {
+      "init": {
+        "data": {
+          "grid_import": "kWh totales importados",
+          "grid_export": "kWh totales exportados",
+          "period": "Periodo",
+          "offset": "Desfase de seguridad."
+        }
+      }
+    }
+  },
+
   "entity": {
     "sensor": {
       "net_exported": {
@@ -22,6 +41,14 @@
       },
       "net_balance": {
         "name": "Balance neto"
+      }
+    }
+  },
+  "selector": {
+    "periods": {
+      "options": {
+        "hourly": "Horario",
+        "quarter": "Cuarto de hora"
       }
     }
   }

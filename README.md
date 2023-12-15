@@ -1,74 +1,86 @@
-([Ver en español](README-es.md))
+# Componente Balance Neto para Home Assistant
 
-# Net Balance Component for Home Assistant
+([English version](README-en.md))
 
-## What is net balance?
+## ¿Qué es el balance neto?
 
-In Spain and other countries, users of photovoltaic panels with surplus compensation have hourly net balance, which calculates the final result of import and export every hour and bills accordingly.
+En España, los usuarios de placas fotovoltáicas con compensación de excedentes disponen del balance neto horario en España (en otros paises es puede ser cada 15 min), el cual
+calcula el resultado final de importación y exportación cada hora y en base a este se le factura.
 
-To put it simply: If you export 3 kWh and import 1 kWh in one hour, it will simply be considered that you have exported 2 kWh.
+Dicho más sencillo: Si en una hora exportas 3kWh e importas 1kWh, simplemente se considerará que has exportado 2kWh.
 
-Since exporting is always cheaper than importing, this represents significant savings for the user.
+Dado que la exportación siempre será más barata que la importación, esto supone un ahorro importante para el usuario.
 
-### Example:
+### Ejemplo:
 
-Let's assume that importing costs €0.15/kWh, and exporting gives a discount of €0.11/kWh. In the first case, we export 3 kWh and import 1 kWh, and in the second case, it's the opposite.
+Supongamos que importar cuesta 0.15€/kWh y exportar nos descuenta 0.11€/kWh, en el primer caso exportamos 3 e importamos 1, en el segundo al revés.
 
-#### Without Balance
-`1 * €0.15 - 3 * €0.11 = -€0.18`
+#### Sin Balance
+`1 * 0.15 - 3 * 0.11 = -0.18`
 
-`3 * €0.15 - 1 * €0.11 = €0.34`
+`3 * 0.15 - 1 * 0.11 = 0.34`
 
-#### With Balance
-`1 - 3 = -2 => -2 * €0.11 = -€0.22`
+#### Con balance
+`1 - 3 = -2 => -2 * 0.11 = -0.22`
 
-`3 - 1 = 2 => 2 * €0.15 = €0.30`
+`3 - 1 = 2 => 2 * 0.15 = 0.30`
 
-As we can see, in both cases, net balance benefits the user.
 
-## What does this component do?
+Como vemos, en ambos casos el balance neto beneficia al usuario.
 
-This component calculates your current hourly balance as well as the result at the end of the hour.
 
-To do this, you need to provide the total imported and exported kWh from your inverter, and the component will create three new entities:
+## ¿Qué hace este componente?
 
-- Net Import
-- Net Export
-- Current Hourly Balance
+Este componente va calculando tu balance net actual así como el resultado al final del periodo.
 
-You can then use Net Import and Net Export in the Energy panel for Home Assistant to perform calculations correctly.
+Para ello, debes indicar los kWh totales importados y exportados de tu inversor  y el componente creará tres entidades nuevas:
 
-### Without net metering
+- Importación Neta
+- Exportación Neta
+- Balance Neto Actual
 
-![Without Balance](img/sin%20balance.png)
+Después podrás usar Importación Neta y Exportación Neta en el panel de Energía para que Home Assistant haga los calculos correctamente.
 
-### With Balance
 
-![With Balance](img/balance.png)
+### Sin balance neto
 
-## Installation
+![Sin Balance](img/sin%20balance.png)
 
-You can install the component using HACS. To do this, simply add this repository to your custom repositories and search for "balance neto".
+### Con Balance
 
-## Configuration
+![Con Balance](img/balance.png)
 
-Once installed, go to _Devices and Services -> Add Integration_ and search for _Balance_.
 
-The assistant will ask for 2 entities: total import from grid kWh and total exported to grid kWh.
 
-## Usage
+## Instalación
+Puedes instalar el componente usando HACS, para ello basta con añadir este repositorio a los repositorios personalizados y buscarlo escribiendo «balance».
 
-Once the component is configured, use "Net Import" as the sensor for _network consumption_ and "Net Export" for _network feed_.
+## Configuración
 
->#### :warning: If you already have historical data in HA, changing the sensors will stop displaying old data. If you want to keep the data, you will need to connect to the database and copy/update the old import/export records to the net import and net export records.
+Una vez instalado, ve a _Dispositivos y Servicios -> Añadir Integración_ y busca _Balance_.
 
-## Activating Devices When There Are Surpluses
+El asistente te solicitará 2 entidades: kWh totales importados de la red y kWh totales exportados a la red.
 
-Thanks to the Current Hourly Balance entity, you can activate and deactivate high-consumption devices, such as electric water heaters, to make the most of the surpluses.
+Adicionalmente solicitará el periodo, que puede ser Horario (como es el caso de España) o cada cuarto de hora.
 
-Instead of using power regulators to adjust consumption to your current production, you can turn the device on and off based on the balance value. For example, turn on the water heater/AC when the net balance is greater than 0.2 kWh and turn it off when it's less than -0.05 kWh.
+Finalmente, puedes seleccionar un desfase de seguridad puesto que Home Assistant puede tardar un poco en realizar los cálculos, los realizará 5 segundos
+antes de terminar el periodo, pero puede ser modificado si fuese necesario.
 
-This way, we can avoid reducing power when a cloud passes by temporarily or never turning on a 1500W device if our surpluses are 750W when we could have it on for half an hour without any issues.
+
+## Uso
+Una vez configurado el componente, usa como sensor de _consumo de red_ «Importación Neta» y _volcar a la red_ «Expotación Neta». 
+
+>#### :warning: Si ya tienes histórico de datos en HA, al cambiar los sensores los datos antiguos dejarán de mostrarse. Si quieres mantener los datos tendrás que conectarse a la base de datos y copiar/actualizar los registros antiguos de importación/exportación a los de importación neta y exportación neta.
+
+
+## Activar dispositivos cuando hay excedentes
+
+Gracias a la entidad de Balance Horario Actual podrás activar y desactivar dispositivos de alto consumo, como termos eléctricos, para aprovechar al máximo los excedentes. 
+
+En vez de usar reguladores de potencia para adaptar el consumo a tu producción actual, puedes encender y apagar el dispositivo según el valor
+del balance. Por ejemplo encender el termo/AC cuando el balance neto sea superior a 0.2kWh y apagarlo cuando sea inferior a -0.05kWh. 
+
+De esta forma evitamos bajar la potencia al pasar una nube de forma puntual o no encender nunca un dispositivo de 1500W si nuestros excedentes son de 750W cuando podríamos tenerlo media hora encendido sin problema.
 
 
 ## Videotutorial

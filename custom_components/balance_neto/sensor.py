@@ -17,7 +17,7 @@ from homeassistant.core import State
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_point_in_time
 from homeassistant.helpers.event import async_track_state_change
-from .const import MAX_DIFF
+from .const import MAX_DIFF, GRID_IMPORT, GRID_EXPORT, OFFSET, PERIOD, HOURLY, QUARTER
 
 EXPORT_DESCRIPTION = SensorEntityDescription(
     key="net_exported",
@@ -59,15 +59,18 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
         hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    import_id = entry.data['grid_import']
-    export_id = entry.data['grid_export']
-
+    offset = entry.data[OFFSET]
+    period = entry.data[PERIOD]
+    import_id = entry.data[GRID_IMPORT]
+    export_id = entry.data[GRID_EXPORT]
     grid_import = GridSensor(IMPORT_DESCRIPTION, f"{entry.entry_id}-import")
     grid_export = GridSensor(EXPORT_DESCRIPTION, f"{entry.entry_id}-export")
 
     grid_balance = BalanceSensor(BALANCE_DESCRIPTION, grid_import, grid_export, import_id, export_id, f"{entry.entry_id}-balance")
 
     async_add_entities([grid_import, grid_export, grid_balance])
+
+    minutes = 60 if period == HOURLY else 15
 
     def update_values(changed_entity: str, old_state: State | None, new_state: State | None):
         grid_balance.update_values()
@@ -79,14 +82,18 @@ async def async_setup_entry(
 
     async def update_totals_and_schedule(now):
         grid_balance.update_totals()
-        async_track_point_in_time(hass, update_totals_and_schedule, now + timedelta(hours=1))
+        async_track_point_in_time(hass, update_totals_and_schedule, now + timedelta(minutes=minutes))
 
     async def first_after_reboot(now):
         grid_export.after_reboot()
         grid_import.after_reboot()
 
-    next = datetime.now().replace(minute=59, second=55, microsecond=0)
-    async_track_point_in_time(hass, update_totals_and_schedule, next)
+    now = datetime.now().replace(second=0, microsecond=0)
+
+    next_minutes = minutes - now.minute % minutes
+    next_reset = now.replace(second=0) + timedelta(minutes=next_minutes) - timedelta(seconds=offset)
+
+    async_track_point_in_time(hass, update_totals_and_schedule, next_reset)
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, first_after_reboot)
 
 
@@ -146,7 +153,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         self._attr_unique_id = unique_id
         self.entity_description = description
 
-        self._last_reset = None
 
     async def async_added_to_hass(self):
         await super().async_added_to_hass()
@@ -156,7 +162,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             self._export = last_sensor_data.attributes.get('Export', 0)
             self._import_offset = last_sensor_data.attributes.get('Import Offset', 0)
             self._export_offset = last_sensor_data.attributes.get('Export Offset', 0)
-            self._last_reset = last_sensor_data.attributes.get('Last Reset')
 
         self.async_write_ha_state()
 
@@ -171,7 +176,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             'Export': self._export,
             'Import Offset': self._import_offset,
             'Export Offset': self._export_offset,
-            'Last Reset': self._last_reset
         }
 
     def _update_value(self):
@@ -204,7 +208,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
                 self._export_offset = export_state
 
             _LOGGER.debug("Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
-                            import_state, export_state, self._import_offset, self._export_offset)
+                          import_state, export_state, self._import_offset, self._export_offset)
 
             self._import = import_state
             self._export = export_state
@@ -212,12 +216,12 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             self._update_value()
         except ValueError as e:
             _LOGGER.error(e)
+            _LOGGER.error("Errors values, Import %s and Export %s", self.hass.states.get(self._import_id).state, self.hass.states.get(self._export_id).state)
             return
 
     def update_totals(self):
         value = float(self._state)
         _LOGGER.debug("Updating net values. Balance %f")
-        self._last_reset = (datetime.utcnow() + timedelta(hours=1)).strftime("%Y-%m-%d %H:00:00")
         self._import_offset = self._import
         self._export_offset = self._export
         if value > 0:
