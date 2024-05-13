@@ -65,7 +65,6 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
     has_entity_name=True,
     native_unit_of_measurement="kWh",
     suggested_display_precision=2,
-    device_class=SensorDeviceClass.ENERGY,
     state_class=SensorStateClass.MEASUREMENT
 )
 
