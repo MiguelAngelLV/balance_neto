@@ -1,48 +1,50 @@
-"""Config flow for Esios Indexada integration."""
+"""Config flow for Net Balance integration."""
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from typing_extensions import override
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
-    SelectSelector,
+    NumberSelector,
+    NumberSelectorConfig,
     SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
     SelectSelectorMode,
-    SelectSelectorConfig, NumberSelector, NumberSelectorConfig,
 )
 
-from .const import DOMAIN, HOURLY, QUARTER, GRID_IMPORT, GRID_EXPORT, PERIOD, OFFSET
+from .const import DOMAIN, GRID_EXPORT, GRID_IMPORT, HOURLY, OFFSET, PERIOD, QUARTER
+
+if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
+    from homeassistant.data_entry_flow import FlowResult
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class PlaceholderHub:
-    def __init__(self, grid_import: str, grid_export: str) -> None:
-        """Initialize."""
-        self.grid_import = grid_import
-        self.grid_export = grid_export
-
-
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow for Net Balance."""
+
     VERSION = 3
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
+    @override
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionFlowHandler:
         return OptionFlowHandler(config_entry)
 
     async def async_step_user(
             self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-
+        """Config flow for Net Balance."""
         schema = vol.Schema({
             vol.Required(GRID_IMPORT): EntitySelector(
                 EntitySelectorConfig(multiple=False, device_class=SensorDeviceClass.ENERGY)
@@ -63,21 +65,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         })
 
-        """Handle the initial step."""
+        # Handle the initial step.
         if user_input is None:
             return self.async_show_form(
                 step_id="user", data_schema=schema
             )
-        else:
-            return self.async_create_entry(title="", data=user_input)
 
+        return self.async_create_entry(title="", data=user_input)
 
 
 class OptionFlowHandler(config_entries.OptionsFlow):
-    def __init__(self, config_entry):
+    """Reconfigure Flow for Net Balance."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize values."""
         self.config_entry = config_entry
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Flow to configure all sensors."""
         grid_import = self.config_entry.options.get(GRID_IMPORT, self.config_entry.data[GRID_IMPORT])
         grid_export = self.config_entry.options.get(GRID_EXPORT, self.config_entry.data[GRID_EXPORT])
         period = self.config_entry.options.get(PERIOD, self.config_entry.data[PERIOD])
@@ -103,10 +108,10 @@ class OptionFlowHandler(config_entries.OptionsFlow):
             ),
         })
 
-        """Handle the initial step."""
+        # Handle the initial step.
         if user_input is None:
             return self.async_show_form(
                 step_id="init", data_schema=schema
             )
-        else:
-            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_create_entry(title="", data=user_input)
