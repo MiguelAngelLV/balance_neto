@@ -1122,20 +1122,6 @@ pycognito = "2023.5.0"
 snitun = "0.36.2"
 
 [[package]]
-name = "holidays"
-version = "0.48"
-description = "Generate and work with holidays in Python"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "holidays-0.48-py3-none-any.whl", hash = "sha256:2ab0fb4a85c12f2ba157e26b190bbc28d0357c4da1959f9d74fc5add66e11b43"},
-    {file = "holidays-0.48.tar.gz", hash = "sha256:8801d45e15600990494988b193cd83ef470f59138bd964bbdf5f023f17cc7966"},
-]
-
-[package.dependencies]
-python-dateutil = "*"
-
-[[package]]
 name = "home-assistant-bluetooth"
 version = "1.12.0"
 description = "Home Assistant Bluetooth Models and Helpers"
@@ -2282,22 +2268,6 @@ attrs = ">=18.2.0"
 cryptography = ">=2.5"
 
 [[package]]
-name = "tariff-td"
-version = "1.0"
-description = "Calcula el periodo actual según las Tarifas Españolas TD 2.0 y 3.0"
-optional = false
-python-versions = ">=3.9"
-files = [
-    {file = "tariff_td-1.0-py3-none-any.whl", hash = "sha256:ed243eb6cea097ec7af973ec20fdb8b0015ae866c1363113931dac4015101abf"},
-    {file = "tariff_td-1.0.tar.gz", hash = "sha256:970b9e8d0bbd6ee880224808260c3ef63dfe96e7619fea211f878bb9b05b2782"},
-]
-
-[package.dependencies]
-aiohttp = ">=3.7.4.post0"
-async_timeout = ">=3.0.1"
-holidays = ">0.18"
-
-[[package]]
 name = "text-unidecode"
 version = "1.3"
 description = "The most basic Text::Unidecode port"
@@ -2825,4 +2795,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "326d161e51c0c3fdaa35776c4cff601592e1a3c1dd39331f4764288bb3157618"
+content-hash = "6d6d2ad4b298f1308081acbbdc78a81b5179c77bcbe5f3a57efa1da83d58f064"
