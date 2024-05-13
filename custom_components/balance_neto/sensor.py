@@ -65,7 +65,7 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
     has_entity_name=True,
     native_unit_of_measurement="kWh",
     suggested_display_precision=2,
-    state_class=SensorStateClass.MEASUREMENT
+    state_class=SensorStateClass.MEASUREMENT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=too-many-locals
 async def async_setup_entry(
-        hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Initialise sensors and add to Home Assistant."""
     offset = entry.data[OFFSET]
@@ -97,7 +97,7 @@ async def async_setup_entry(
     minutes = 60 if period == HOURLY else 15
 
     def update_values(
-            _changed_entity: str, _old_state: State | None, _new_state: State | None
+        _changed_entity: str, _old_state: State | None, _new_state: State | None
     ) -> None:
         grid_balance.update_values()
 
@@ -125,9 +125,9 @@ async def async_setup_entry(
 
     next_minutes = minutes - now.minute % minutes
     next_reset = (
-            now.replace(second=0)
-            + timedelta(minutes=next_minutes)
-            - timedelta(seconds=offset)
+        now.replace(second=0)
+        + timedelta(minutes=next_minutes)
+        - timedelta(seconds=offset)
     )
 
     async_track_point_in_time(hass, update_totals_and_schedule, next_reset)
@@ -181,13 +181,13 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
     # pylint: disable=too-many-instance-attributes too-many-arguments
     def __init__(  # noqa: PLR0913
-            self,
-            description: SensorEntityDescription,
-            import_sensor: GridNetSensor,
-            export_sensor: GridNetSensor,
-            import_id: str,
-            export_id: str,
-            unique_id: str,
+        self,
+        description: SensorEntityDescription,
+        import_sensor: GridNetSensor,
+        export_sensor: GridNetSensor,
+        import_id: str,
+        export_id: str,
+        unique_id: str,
     ) -> None:
         """Initialise values."""
         super().__init__()
@@ -233,7 +233,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
     def _update_value(self) -> None:
         self._state = (self._export - self._export_offset) - (
-                self._import - self._import_offset
+            self._import - self._import_offset
         )
         _LOGGER.debug("Actual Balance %f", self._state)
         self.schedule_update_ha_state()
