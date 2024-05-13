@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "balance_neto"
+version = "2.0"
+description = "Componente para Home Assistant para calcular el Balance Neto Horario en sistemas de autoconsumo."
+authors = ["Miguel Ángel López <miguel.angel.lopez.vicente@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/miguelangellv/balance_neto"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+homeassistant = ">=2024.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "3.6.2"
+pre-commit-hooks = "4.5.0"
+pylint = "3.1.0"
+ruff = "0.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+src = ["custom_components/tarifa_20td"]
+
+[tool.ruff.lint]
+ignore = [
+  "ANN101", # Self... explanatory
+  "ANN401", # Opiniated warning on disallowing dynamically typed expressions
+  "D203", # Conflicts with other rules
+  "D213", # Conflicts with other rules
+  "TID252", # Relative imports
+  "RUF012", # Just broken
+
+  # Formatter conflicts
+  "COM812",
+  "COM819",
+  "D206",
+  "E501",
+  "ISC001",
+  "Q000",
+  "Q001",
+  "Q002",
+  "Q003",
+  "W191",
+]
+select = ["ALL"]
+
+[tool.ruff.lint.flake8-import-conventions.extend-aliases]
+"homeassistant.helpers.area_registry" = "ar"
+"homeassistant.helpers.config_validation" = "cv"
+"homeassistant.helpers.device_registry" = "dr"
+"homeassistant.helpers.entity_registry" = "er"
+"homeassistant.helpers.issue_registry" = "ir"
+voluptuous = "vol"
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = [
+    "homeassistant",
+]
+combine-as-imports = true
+
+[tool.pylint."MESSAGES CONTROL"]
+# Reasons disabled:
+# format - handled by ruff
+# duplicate-code - unavoidable
+# used-before-assignment - false positives with TYPE_CHECKING structures
+disable = [
+  "abstract-method",
+  "duplicate-code",
+  "format",
+  "unexpected-keyword-arg",
+  "used-before-assignment",
+]
