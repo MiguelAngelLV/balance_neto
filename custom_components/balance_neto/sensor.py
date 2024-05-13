@@ -65,8 +65,7 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
     has_entity_name=True,
     native_unit_of_measurement="kWh",
     suggested_display_precision=2,
-    device_class=SensorDeviceClass.ENERGY,
-    state_class=SensorStateClass.MEASUREMENT
+    state_class=SensorStateClass.MEASUREMENT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -241,54 +240,51 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
     def update_values(self) -> None:
         """Update Net Balance state."""
-        try:
-            _LOGGER.debug(
-                "Import (%s): %s",
-                self._import_id,
-                self.hass.states.get(self._import_id).state,
-            )
-            _LOGGER.debug(
-                "Export (%s): %s",
-                self._export_id,
-                self.hass.states.get(self._export_id).state,
-            )
+        _LOGGER.debug(
+            "Import (%s): %s",
+            self._import_id,
+            self.hass.states.get(self._import_id).state,
+        )
+        _LOGGER.debug(
+            "Export (%s): %s",
+            self._export_id,
+            self.hass.states.get(self._export_id).state,
+        )
 
-            import_state = float(self.hass.states.get(self._import_id).state)
-            export_state = float(self.hass.states.get(self._export_id).state)
+        import_state = self._as_number(self.hass.states.get(self._import_id).state)
+        export_state = self._as_number(self.hass.states.get(self._export_id).state)
 
-            if self._import_offset == 0:
-                self._import_offset = import_state
-
-            diff = import_state - self._import_offset
-            if diff > MAX_DIFF or diff < 0:
-                self._import_offset = import_state
-
-            if self._export_offset == 0:
-                self._export_offset = export_state
-
-            diff = export_state - self._export_offset
-            if diff > MAX_DIFF or diff < 0:
-                self._export_offset = export_state
-
-            _LOGGER.debug(
-                "Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
-                import_state,
-                export_state,
-                self._import_offset,
-                self._export_offset,
-            )
-
-            self._import = import_state
-            self._export = export_state
-
-            self._update_value()
-        except ValueError:
-            _LOGGER.exception(
-                "Errors values, Import %s and Export %s",
-                self.hass.states.get(self._import_id).state,
-                self.hass.states.get(self._export_id).state,
-            )
+        if import_state is None or export_state is None:
             return
+
+        if self._import_offset == 0:
+            self._import_offset = import_state
+
+        diff = import_state - self._import_offset
+        if diff > MAX_DIFF or diff < 0:
+            self._import_offset = import_state
+
+        if self._export_offset == 0:
+            self._export_offset = export_state
+
+        diff = export_state - self._export_offset
+        if diff > MAX_DIFF or diff < 0:
+            self._export_offset = export_state
+
+        _LOGGER.debug(
+            "Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
+            import_state,
+            export_state,
+            self._import_offset,
+            self._export_offset,
+        )
+
+        self._import = import_state
+        self._export = export_state
+
+        self._update_value()
+
+        return
 
     def update_totals(self) -> None:
         """Update Net Total values."""
@@ -306,3 +302,10 @@ class BalanceSensor(SensorEntity, RestoreEntity):
     def _reset(self) -> None:
         self._import_offset = 0
         self._export_offset = 0
+
+    @staticmethod
+    def _as_number(value: str) -> float | None:
+        try:
+            return float(value)
+        except ValueError:
+            return None
