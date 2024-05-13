@@ -10,4 +10,3 @@ PERIOD = "period"
 OFFSET = "offset"
 GRID_EXPORT = "grid_export"
 GRID_IMPORT = "grid_import"
-

@@ -42,7 +42,7 @@ EXPORT_DESCRIPTION = SensorEntityDescription(
     native_unit_of_measurement="kWh",
     device_class=SensorDeviceClass.ENERGY,
     state_class=SensorStateClass.TOTAL_INCREASING,
-    suggested_display_precision=2
+    suggested_display_precision=2,
 )
 
 IMPORT_DESCRIPTION = SensorEntityDescription(
@@ -54,7 +54,7 @@ IMPORT_DESCRIPTION = SensorEntityDescription(
     device_class=SensorDeviceClass.ENERGY,
     native_unit_of_measurement="kWh",
     state_class=SensorStateClass.TOTAL_INCREASING,
-    suggested_display_precision=2
+    suggested_display_precision=2,
 )
 
 BALANCE_DESCRIPTION = SensorEntityDescription(
@@ -64,7 +64,7 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
     translation_key="net_balance",
     has_entity_name=True,
     native_unit_of_measurement="kWh",
-    suggested_display_precision=2
+    suggested_display_precision=2,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=too-many-locals
 async def async_setup_entry(
-        hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Initialise sensors and add to Home Assistant."""
     offset = entry.data[OFFSET]
@@ -82,24 +82,39 @@ async def async_setup_entry(
     grid_import = GridNetSensor(IMPORT_DESCRIPTION, f"{entry.entry_id}-import")
     grid_export = GridNetSensor(EXPORT_DESCRIPTION, f"{entry.entry_id}-export")
 
-    grid_balance = BalanceSensor(BALANCE_DESCRIPTION, grid_import, grid_export, import_id, export_id, f"{entry.entry_id}-balance")
+    grid_balance = BalanceSensor(
+        BALANCE_DESCRIPTION,
+        grid_import,
+        grid_export,
+        import_id,
+        export_id,
+        f"{entry.entry_id}-balance",
+    )
 
     async_add_entities([grid_import, grid_export, grid_balance])
 
     minutes = 60 if period == HOURLY else 15
 
-    def update_values(_changed_entity: str, _old_state: State | None, _new_state: State | None) -> None:
+    def update_values(
+        _changed_entity: str, _old_state: State | None, _new_state: State | None
+    ) -> None:
         grid_balance.update_values()
 
     async_track_state_change(hass, import_id, update_values)
     async_track_state_change(hass, export_id, update_values)
 
-    _LOGGER.debug("Starting Balance Neto with %s for import and %s for export", import_id, export_id)
+    _LOGGER.debug(
+        "Starting Balance Neto with %s for import and %s for export",
+        import_id,
+        export_id,
+    )
 
     @callback
     async def update_totals_and_schedule(_now: datetime) -> None:
         grid_balance.update_totals()
-        async_track_point_in_time(hass, update_totals_and_schedule, now + timedelta(minutes=minutes))
+        async_track_point_in_time(
+            hass, update_totals_and_schedule, now + timedelta(minutes=minutes)
+        )
 
     async def first_after_reboot(_now: datetime) -> None:
         grid_export.after_reboot()
@@ -108,7 +123,11 @@ async def async_setup_entry(
     now = datetime.now(tz=pytz.UTC).replace(second=0, microsecond=0)
 
     next_minutes = minutes - now.minute % minutes
-    next_reset = now.replace(second=0) + timedelta(minutes=next_minutes) - timedelta(seconds=offset)
+    next_reset = (
+        now.replace(second=0)
+        + timedelta(minutes=next_minutes)
+        - timedelta(seconds=offset)
+    )
 
     async_track_point_in_time(hass, update_totals_and_schedule, next_reset)
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, first_after_reboot)
@@ -136,7 +155,7 @@ class GridNetSensor(SensorEntity, RestoreEntity):
     @override
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
         return {
-            'Reboot': self._reboot,
+            "Reboot": self._reboot,
         }
 
     @property
@@ -147,26 +166,28 @@ class GridNetSensor(SensorEntity, RestoreEntity):
     def update_value(self, value: float) -> None:
         """Update with balance."""
         self._state = float(self._state) + value
-        self.async_write_ha_state()
+        self.schedule_update_ha_state()
         _LOGGER.debug("Updating value %f for %s", self._state, self._attr_unique_id)
 
     def after_reboot(self) -> None:
         """Set after reboot."""
         self._reboot = datetime.now(tz=pytz.UTC).isoformat()
-        self.async_write_ha_state()
+        self.schedule_update_ha_state()
 
 
 class BalanceSensor(SensorEntity, RestoreEntity):
     """Net Balance Sensor."""
 
     # pylint: disable=too-many-instance-attributes too-many-arguments
-    def __init__(self, description: SensorEntityDescription,  # noqa: PLR0913
-                 import_sensor: GridNetSensor,
-                 export_sensor: GridNetSensor,
-                 import_id: str,
-                 export_id: str,
-                 unique_id: str
-                 ) -> None:
+    def __init__(  # noqa: PLR0913
+        self,
+        description: SensorEntityDescription,
+        import_sensor: GridNetSensor,
+        export_sensor: GridNetSensor,
+        import_id: str,
+        export_id: str,
+        unique_id: str,
+    ) -> None:
         """Initialise values."""
         super().__init__()
         self._import = 0
@@ -187,10 +208,10 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         await super().async_added_to_hass()
         if (last_sensor_data := await self.async_get_last_state()) is not None:
             self._state = last_sensor_data.state
-            self._import = last_sensor_data.attributes.get('Import', 0)
-            self._export = last_sensor_data.attributes.get('Export', 0)
-            self._import_offset = last_sensor_data.attributes.get('Import Offset', 0)
-            self._export_offset = last_sensor_data.attributes.get('Export Offset', 0)
+            self._import = last_sensor_data.attributes.get("Import", 0)
+            self._export = last_sensor_data.attributes.get("Export", 0)
+            self._import_offset = last_sensor_data.attributes.get("Import Offset", 0)
+            self._export_offset = last_sensor_data.attributes.get("Export Offset", 0)
 
         self.async_write_ha_state()
 
@@ -203,22 +224,32 @@ class BalanceSensor(SensorEntity, RestoreEntity):
     @override
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
         return {
-            'Import': self._import,
-            'Export': self._export,
-            'Import Offset': self._import_offset,
-            'Export Offset': self._export_offset,
+            "Import": self._import,
+            "Export": self._export,
+            "Import Offset": self._import_offset,
+            "Export Offset": self._export_offset,
         }
 
     def _update_value(self) -> None:
-        self._state = (self._export - self._export_offset) - (self._import - self._import_offset)
+        self._state = (self._export - self._export_offset) - (
+            self._import - self._import_offset
+        )
         _LOGGER.debug("Actual Balance %f", self._state)
-        self.async_write_ha_state()
+        self.schedule_update_ha_state()
 
     def update_values(self) -> None:
         """Update Net Balance state."""
         try:
-            _LOGGER.debug("Import (%s): %s", self._import_id, self.hass.states.get(self._import_id).state)
-            _LOGGER.debug("Export (%s): %s", self._export_id, self.hass.states.get(self._export_id).state)
+            _LOGGER.debug(
+                "Import (%s): %s",
+                self._import_id,
+                self.hass.states.get(self._import_id).state,
+            )
+            _LOGGER.debug(
+                "Export (%s): %s",
+                self._export_id,
+                self.hass.states.get(self._export_id).state,
+            )
 
             import_state = float(self.hass.states.get(self._import_id).state)
             export_state = float(self.hass.states.get(self._export_id).state)
@@ -237,15 +268,24 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             if diff > MAX_DIFF or diff < 0:
                 self._export_offset = export_state
 
-            _LOGGER.debug("Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
-                          import_state, export_state, self._import_offset, self._export_offset)
+            _LOGGER.debug(
+                "Updating Balance Neto. Actual Import %f, Export %f. Import offset %f, Export offset %f",
+                import_state,
+                export_state,
+                self._import_offset,
+                self._export_offset,
+            )
 
             self._import = import_state
             self._export = export_state
 
             self._update_value()
         except ValueError:
-            _LOGGER.exception("Errors values, Import %s and Export %s", self.hass.states.get(self._import_id).state, self.hass.states.get(self._export_id).state)
+            _LOGGER.exception(
+                "Errors values, Import %s and Export %s",
+                self.hass.states.get(self._import_id).state,
+                self.hass.states.get(self._export_id).state,
+            )
             return
 
     def update_totals(self) -> None:
