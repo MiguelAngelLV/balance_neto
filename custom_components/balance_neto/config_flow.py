@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any
 
+from typing_extensions import override
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -64,7 +65,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         })
 
-        """Handle the initial step."""
+        # Handle the initial step.
         if user_input is None:
             return self.async_show_form(
                 step_id="user", data_schema=schema
@@ -107,7 +108,7 @@ class OptionFlowHandler(config_entries.OptionsFlow):
             ),
         })
 
-        """Handle the initial step."""
+        # Handle the initial step.
         if user_input is None:
             return self.async_show_form(
                 step_id="init", data_schema=schema

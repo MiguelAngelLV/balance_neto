@@ -4,16 +4,17 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 import logging
-from typing import TYPE_CHECKING, Any, Mapping, override
+from typing import TYPE_CHECKING, Any, Mapping
 
 import pytz
+from typing_extensions import override
 
 from homeassistant.components.sensor import (
-    DEVICE_CLASS_ENERGY,
-    STATE_CLASS_TOTAL_INCREASING,
     RestoreEntity,
+    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
+    SensorStateClass,
 )
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import callback
@@ -39,8 +40,8 @@ EXPORT_DESCRIPTION = SensorEntityDescription(
     translation_key="net_exported",
     has_entity_name=True,
     native_unit_of_measurement="kWh",
-    device_class=DEVICE_CLASS_ENERGY,
-    state_class=STATE_CLASS_TOTAL_INCREASING,
+    device_class=SensorDeviceClass.ENERGY,
+    state_class=SensorStateClass.TOTAL_INCREASING,
     suggested_display_precision=2
 )
 
@@ -50,9 +51,9 @@ IMPORT_DESCRIPTION = SensorEntityDescription(
     name="Net imported",
     translation_key="net_imported",
     has_entity_name=True,
-    device_class=DEVICE_CLASS_ENERGY,
+    device_class=SensorDeviceClass.ENERGY,
     native_unit_of_measurement="kWh",
-    state_class=STATE_CLASS_TOTAL_INCREASING,
+    state_class=SensorStateClass.TOTAL_INCREASING,
     suggested_display_precision=2
 )
 
@@ -69,6 +70,7 @@ BALANCE_DESCRIPTION = SensorEntityDescription(
 _LOGGER = logging.getLogger(__name__)
 
 
+# pylint: disable=too-many-locals
 async def async_setup_entry(
         hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
@@ -157,6 +159,7 @@ class GridNetSensor(SensorEntity, RestoreEntity):
 class BalanceSensor(SensorEntity, RestoreEntity):
     """Net Balance Sensor."""
 
+    # pylint: disable=too-many-instance-attributes too-many-arguments
     def __init__(self, description: SensorEntityDescription,  # noqa: PLR0913
                  import_sensor: GridNetSensor,
                  export_sensor: GridNetSensor,
