@@ -19,8 +19,9 @@ from homeassistant.components.sensor import (
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import callback
 from homeassistant.helpers.event import (
+    EventStateChangedData,
     async_track_point_in_time,
-    async_track_state_change,
+    async_track_state_change_event,
 )
 
 from .const import GRID_EXPORT, GRID_IMPORT, HOURLY, MAX_DIFF, OFFSET, PERIOD
@@ -29,9 +30,9 @@ if TYPE_CHECKING:
     from decimal import Decimal
 
     from homeassistant.config_entries import ConfigEntry
-    from homeassistant.core import HomeAssistant, State
+    from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
-    from homeassistant.helpers.typing import StateType
+    from homeassistant.helpers.typing import EventType, StateType
 
 EXPORT_DESCRIPTION = SensorEntityDescription(
     key="net_exported",
@@ -96,13 +97,11 @@ async def async_setup_entry(
 
     minutes = 60 if period == HOURLY else 15
 
-    async def update_values(
-        _changed_entity: str, _old_state: State | None, _new_state: State | None
-    ) -> None:
+    async def update_values(_event: EventType[EventStateChangedData]) -> None:
         await grid_balance.update_values()
 
-    async_track_state_change(hass, import_id, update_values)
-    async_track_state_change(hass, export_id, update_values)
+    async_track_state_change_event(hass, import_id, update_values)
+    async_track_state_change_event(hass, export_id, update_values)
 
     _LOGGER.debug(
         "Starting Balance Neto with %s for import and %s for export",
@@ -114,7 +113,7 @@ async def async_setup_entry(
     async def update_totals_and_schedule(_now: datetime) -> None:
         await grid_balance.update_totals()
         async_track_point_in_time(
-            hass, update_totals_and_schedule, now + timedelta(minutes=minutes)
+            hass, update_totals_and_schedule, _now + timedelta(minutes=minutes)
         )
 
     async def first_after_reboot(_now: datetime) -> None:
