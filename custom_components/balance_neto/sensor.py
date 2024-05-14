@@ -96,10 +96,10 @@ async def async_setup_entry(
 
     minutes = 60 if period == HOURLY else 15
 
-    def update_values(
+    async def update_values(
         _changed_entity: str, _old_state: State | None, _new_state: State | None
     ) -> None:
-        grid_balance.update_values()
+        await grid_balance.update_values()
 
     async_track_state_change(hass, import_id, update_values)
     async_track_state_change(hass, export_id, update_values)
@@ -112,14 +112,14 @@ async def async_setup_entry(
 
     @callback
     async def update_totals_and_schedule(_now: datetime) -> None:
-        grid_balance.update_totals()
+        await grid_balance.update_totals()
         async_track_point_in_time(
             hass, update_totals_and_schedule, now + timedelta(minutes=minutes)
         )
 
     async def first_after_reboot(_now: datetime) -> None:
-        grid_export.after_reboot()
-        grid_import.after_reboot()
+        await grid_export.after_reboot()
+        await grid_import.after_reboot()
 
     now = datetime.now(tz=pytz.UTC).replace(second=0, microsecond=0)
 
@@ -164,16 +164,16 @@ class GridNetSensor(SensorEntity, RestoreEntity):
     def native_value(self) -> StateType | date | datetime | Decimal:
         return self._state
 
-    def update_value(self, value: float) -> None:
+    async def update_value(self, value: float) -> None:
         """Update with balance."""
         self._state = float(self._state) + value
-        self.schedule_update_ha_state()
+        self.async_write_ha_state()
         _LOGGER.debug("Updating value %f for %s", self._state, self._attr_unique_id)
 
-    def after_reboot(self) -> None:
+    async def after_reboot(self) -> None:
         """Set after reboot."""
         self._reboot = datetime.now(tz=pytz.UTC).isoformat()
-        self.schedule_update_ha_state()
+        self.async_write_ha_state()
 
 
 class BalanceSensor(SensorEntity, RestoreEntity):
@@ -231,14 +231,14 @@ class BalanceSensor(SensorEntity, RestoreEntity):
             "Export Offset": self._export_offset,
         }
 
-    def _update_value(self) -> None:
+    async def _update_value(self) -> None:
         self._state = (self._export - self._export_offset) - (
             self._import - self._import_offset
         )
         _LOGGER.debug("Actual Balance %f", self._state)
-        self.schedule_update_ha_state()
+        self.async_write_ha_state()
 
-    def update_values(self) -> None:
+    async def update_values(self) -> None:
         """Update Net Balance state."""
         _LOGGER.debug(
             "Import (%s): %s",
@@ -282,22 +282,21 @@ class BalanceSensor(SensorEntity, RestoreEntity):
         self._import = import_state
         self._export = export_state
 
-        self._update_value()
+        await self._update_value()
 
-        return
 
-    def update_totals(self) -> None:
+    async def update_totals(self) -> None:
         """Update Net Total values."""
         value = float(self._state)
         _LOGGER.debug("Updating net values. Balance %f")
         self._import_offset = self._import
         self._export_offset = self._export
         if value > 0:
-            self._export_sensor.update_value(value)
+            await self._export_sensor.update_value(value)
         else:
-            self._import_sensor.update_value(-value)
+            await self._import_sensor.update_value(-value)
 
-        self._update_value()
+        await self._update_value()
 
     def _reset(self) -> None:
         self._import_offset = 0
