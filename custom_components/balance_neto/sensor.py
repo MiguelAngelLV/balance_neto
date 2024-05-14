@@ -284,7 +284,6 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
         await self._update_value()
 
-
     async def update_totals(self) -> None:
         """Update Net Total values."""
         value = float(self._state)
