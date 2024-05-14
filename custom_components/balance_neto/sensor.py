@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 import logging
-from typing import TYPE_CHECKING, Any, Mapping
+
+# pylint: disable=no-name-in-module
+from typing import TYPE_CHECKING, Any, Mapping, override
 
 import pytz
-from typing_extensions import override
 
 from homeassistant.components.sensor import (
     RestoreEntity,
@@ -19,8 +20,9 @@ from homeassistant.components.sensor import (
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import callback
 from homeassistant.helpers.event import (
+    EventStateChangedData,
     async_track_point_in_time,
-    async_track_state_change,
+    async_track_state_change_event,
 )
 
 from .const import GRID_EXPORT, GRID_IMPORT, HOURLY, MAX_DIFF, OFFSET, PERIOD
@@ -29,9 +31,9 @@ if TYPE_CHECKING:
     from decimal import Decimal
 
     from homeassistant.config_entries import ConfigEntry
-    from homeassistant.core import HomeAssistant, State
+    from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
-    from homeassistant.helpers.typing import StateType
+    from homeassistant.helpers.typing import EventType, StateType
 
 EXPORT_DESCRIPTION = SensorEntityDescription(
     key="net_exported",
@@ -73,7 +75,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=too-many-locals
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+        hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Initialise sensors and add to Home Assistant."""
     offset = entry.data[OFFSET]
@@ -96,13 +98,11 @@ async def async_setup_entry(
 
     minutes = 60 if period == HOURLY else 15
 
-    async def update_values(
-        _changed_entity: str, _old_state: State | None, _new_state: State | None
-    ) -> None:
+    async def update_values(_event: EventType[EventStateChangedData]) -> None:
         await grid_balance.update_values()
 
-    async_track_state_change(hass, import_id, update_values)
-    async_track_state_change(hass, export_id, update_values)
+    async_track_state_change_event(hass, import_id, update_values)
+    async_track_state_change_event(hass, export_id, update_values)
 
     _LOGGER.debug(
         "Starting Balance Neto with %s for import and %s for export",
@@ -114,7 +114,7 @@ async def async_setup_entry(
     async def update_totals_and_schedule(_now: datetime) -> None:
         await grid_balance.update_totals()
         async_track_point_in_time(
-            hass, update_totals_and_schedule, now + timedelta(minutes=minutes)
+            hass, update_totals_and_schedule, _now + timedelta(minutes=minutes)
         )
 
     async def first_after_reboot(_now: datetime) -> None:
@@ -125,9 +125,9 @@ async def async_setup_entry(
 
     next_minutes = minutes - now.minute % minutes
     next_reset = (
-        now.replace(second=0)
-        + timedelta(minutes=next_minutes)
-        - timedelta(seconds=offset)
+            now.replace(second=0)
+            + timedelta(minutes=next_minutes)
+            - timedelta(seconds=offset)
     )
 
     async_track_point_in_time(hass, update_totals_and_schedule, next_reset)
@@ -181,13 +181,13 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
     # pylint: disable=too-many-instance-attributes too-many-arguments
     def __init__(  # noqa: PLR0913
-        self,
-        description: SensorEntityDescription,
-        import_sensor: GridNetSensor,
-        export_sensor: GridNetSensor,
-        import_id: str,
-        export_id: str,
-        unique_id: str,
+            self,
+            description: SensorEntityDescription,
+            import_sensor: GridNetSensor,
+            export_sensor: GridNetSensor,
+            import_id: str,
+            export_id: str,
+            unique_id: str,
     ) -> None:
         """Initialise values."""
         super().__init__()
@@ -233,7 +233,7 @@ class BalanceSensor(SensorEntity, RestoreEntity):
 
     async def _update_value(self) -> None:
         self._state = (self._export - self._export_offset) - (
-            self._import - self._import_offset
+                self._import - self._import_offset
         )
         _LOGGER.debug("Actual Balance %f", self._state)
         self.async_write_ha_state()
